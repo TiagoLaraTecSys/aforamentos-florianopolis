@@ -1,0 +1,1 @@
+<img src="{{ asset('image/logo_floripa.png') }}" alt="Logo Floripa" class="object-contain" {{ $attributes }}> 
