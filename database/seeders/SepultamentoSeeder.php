@@ -24,6 +24,8 @@ class SepultamentoSeeder extends Seeder
      */
     public function run(): void
     {
+        // Purge: Limpa a tabela antes de importar
+        \DB::table('sepultamentos')->truncate();
         // Caminho para o arquivo CSV (você pode alterar conforme necessário)
         $csvPath = storage_path('app/sepultamentos.csv');
         

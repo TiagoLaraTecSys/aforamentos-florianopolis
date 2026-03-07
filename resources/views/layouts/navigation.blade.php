@@ -9,6 +9,9 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard') || request()->routeIs('sepultamentos.*')">
                         {{ __('Sepultamentos') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('users')" :active="request()->routeIs('users') || request()->routeIs('users.*')">
+                        Usuários
+                   </x-nav-link>
                 </div>
             </div>
 

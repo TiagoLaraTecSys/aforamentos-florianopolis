@@ -19,12 +19,12 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    
+
                     <!-- Filtros -->
                     <div class="mb-6">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-medium text-gray-900">Filtros</h3>
-                            <button onclick="toggleFilters()" 
+                            <button onclick="toggleFilters()"
                                     class="flex items-center space-x-2 bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
@@ -32,56 +32,56 @@
                                 <span>Filtros</span>
                             </button>
                         </div>
-                        
+
                         <div id="filtersDropdown" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200" style="display: none;">
-                            
+
                             <form method="GET" action="{{ route('sepultamentos.index') }}" class="space-y-4">
                                 <!-- Nome do Falecido -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Falecido</label>
-                                    <input type="text" name="nome_falecido" value="{{ request('nome_falecido') }}" 
+                                    <input type="text" name="nome_falecido" value="{{ request('nome_falecido') }}"
                                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
                                 <!-- Cemitério -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Cemitério</label>
-                                    <input type="text" name="cemiterio" value="{{ request('cemiterio') }}" 
+                                    <input type="text" name="cemiterio" value="{{ request('cemiterio') }}"
                                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
                                 <!-- Nome do Servidor -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Servidor</label>
-                                    <input type="text" name="nome_servidor" value="{{ request('nome_servidor') }}" 
+                                    <input type="text" name="nome_servidor" value="{{ request('nome_servidor') }}"
                                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
                                 <!-- Quadra -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Quadra</label>
-                                    <input type="text" name="quadra" value="{{ request('quadra') }}" 
+                                    <input type="text" name="quadra" value="{{ request('quadra') }}"
                                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
                                 <!-- Sepultura -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Sepultura</label>
-                                    <input type="text" name="sepultura" value="{{ request('sepultura') }}" 
+                                    <input type="text" name="sepultura" value="{{ request('sepultura') }}"
                                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
                                 <!-- Data Início -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-                                    <input type="date" name="data_inicio" value="{{ request('data_inicio') }}" 
+                                    <input type="date" name="data_inicio" value="{{ request('data_inicio') }}"
                                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
                                 <!-- Data Fim -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-                                    <input type="date" name="data_fim" value="{{ request('data_fim') }}" 
+                                    <input type="date" name="data_fim" value="{{ request('data_fim') }}"
                                            class="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
@@ -169,14 +169,14 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div class="flex space-x-2">
-                                                <a href="{{ route('sepultamentos.show', $sepultamento) }}" 
+                                                <a href="{{ route('sepultamentos.show', $sepultamento) }}"
                                                    class="text-indigo-600 hover:text-indigo-900">Ver</a>
-                                                <a href="{{ route('sepultamentos.edit', $sepultamento) }}" 
+                                                <a href="{{ route('sepultamentos.edit', $sepultamento) }}"
                                                    class="text-yellow-600 hover:text-yellow-900">Editar</a>
                                                 <form action="{{ route('sepultamentos.destroy', $sepultamento) }}" method="POST" class="inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900" 
+                                                    <button type="submit" class="text-red-600 hover:text-red-900"
                                                             onclick="return confirm('Tem certeza que deseja excluir este sepultamento?')">
                                                         Excluir
                                                     </button>
@@ -208,4 +208,4 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>
