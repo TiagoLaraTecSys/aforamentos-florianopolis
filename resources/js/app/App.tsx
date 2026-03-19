@@ -4,7 +4,11 @@ import { CemeteryDashboard } from '@/app/components/CemeteryDashboard';
 import { LoginPage } from '@/app/components/LoginPage';
 
 function AppContent() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+
+    if (loading) {
+      return <div>Carregando...</div>;
+    }
 
   if (!isAuthenticated) {
     return <LoginPage />;

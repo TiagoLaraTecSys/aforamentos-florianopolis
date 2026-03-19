@@ -83,12 +83,12 @@ export interface Lease {
 }
 
 const initialCemeteries: Cemetery[] = [
-  { 
-    id: 1, 
-    name: 'SÃO FRANCISCO DE ASSIS', 
-    location: 'Itacorubi', 
+  {
+    id: 1,
+    name: 'SÃO FRANCISCO DE ASSIS',
+    location: 'Itacorubi',
     address: 'Rua Pastor William Richard Schisler Filho, nº 452, Itacorubi, Florianópolis – SC',
-    totalPlots: 1500, 
+    totalPlots: 1500,
     occupiedPlots: 1200,
     totalQuadras: 15,
     plotsPerQuadra: 100,
@@ -103,12 +103,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério municipal com área de 50.000 m²'
   },
-  { 
-    id: 2, 
-    name: 'SÃO CRISTÓVÃO', 
-    location: 'Capoeiras', 
+  {
+    id: 2,
+    name: 'SÃO CRISTÓVÃO',
+    location: 'Capoeiras',
     address: 'Rua São Cristóvão, Capoeiras, Florianópolis – SC',
-    totalPlots: 1200, 
+    totalPlots: 1200,
     occupiedPlots: 890,
     totalQuadras: 12,
     plotsPerQuadra: 100,
@@ -123,12 +123,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério particular com área de 40.000 m²'
   },
-  { 
-    id: 3, 
-    name: 'BARRA DA LAGOA', 
-    location: 'Fortaleza da Barra da Lagoa', 
+  {
+    id: 3,
+    name: 'BARRA DA LAGOA',
+    location: 'Fortaleza da Barra da Lagoa',
     address: 'Rua Laurindo José de Souza, Fortaleza da Barra da Lagoa, Florianópolis – SC',
-    totalPlots: 800, 
+    totalPlots: 800,
     occupiedPlots: 650,
     totalQuadras: 8,
     plotsPerQuadra: 100,
@@ -143,12 +143,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério paroquial com área de 30.000 m²'
   },
-  { 
-    id: 4, 
-    name: 'CAMPECHE', 
-    location: 'Campeche', 
+  {
+    id: 4,
+    name: 'CAMPECHE',
+    location: 'Campeche',
     address: 'Rua da Capela, Campeche, Florianópolis',
-    totalPlots: 950, 
+    totalPlots: 950,
     occupiedPlots: 720,
     totalQuadras: 9,
     plotsPerQuadra: 100,
@@ -163,12 +163,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério municipal com área de 45.000 m²'
   },
-  { 
-    id: 5, 
-    name: 'CANASVIEIRAS', 
-    location: 'Canasvieiras', 
+  {
+    id: 5,
+    name: 'CANASVIEIRAS',
+    location: 'Canasvieiras',
     address: 'Rodovia Teruliano Brito Xavier (atrás da Igreja de Santo Antônio de Paula), Canasvieiras, Florianópolis – SC',
-    totalPlots: 1100, 
+    totalPlots: 1100,
     occupiedPlots: 850,
     totalQuadras: 11,
     plotsPerQuadra: 100,
@@ -183,12 +183,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério particular com área de 55.000 m²'
   },
-  { 
-    id: 6, 
-    name: 'INGLESES/SANTINHO', 
-    location: 'Ingleses (Santinho)', 
+  {
+    id: 6,
+    name: 'INGLESES/SANTINHO',
+    location: 'Ingleses (Santinho)',
     address: 'Estrada Vereador Onildo Lemos, Ingleses (Santinho), Florianópolis – SC',
-    totalPlots: 1050, 
+    totalPlots: 1050,
     occupiedPlots: 780,
     totalQuadras: 10,
     plotsPerQuadra: 100,
@@ -203,12 +203,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério paroquial com área de 40.000 m²'
   },
-  { 
-    id: 7, 
-    name: 'LAGOA DA CONCEIÇÃO', 
-    location: 'Lagoa da Conceição', 
+  {
+    id: 7,
+    name: 'LAGOA DA CONCEIÇÃO',
+    location: 'Lagoa da Conceição',
     address: 'Rua Manoel Severino de Oliveira, Lagoa da Conceição, Florianópolis – SC',
-    totalPlots: 1300, 
+    totalPlots: 1300,
     occupiedPlots: 1050,
     totalQuadras: 13,
     plotsPerQuadra: 100,
@@ -223,12 +223,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério municipal com área de 60.000 m²'
   },
-  { 
-    id: 8, 
-    name: 'PÂNTANO DO SUL', 
-    location: 'Pântano do Sul', 
+  {
+    id: 8,
+    name: 'PÂNTANO DO SUL',
+    location: 'Pântano do Sul',
     address: 'Rua Sinfronio Manoel de Souza, Pântano do Sul, Florianópolis – SC',
-    totalPlots: 700, 
+    totalPlots: 700,
     occupiedPlots: 520,
     totalQuadras: 7,
     plotsPerQuadra: 100,
@@ -243,12 +243,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério particular com área de 35.000 m²'
   },
-  { 
-    id: 9, 
-    name: 'RATONES', 
-    location: 'Ratones', 
+  {
+    id: 9,
+    name: 'RATONES',
+    location: 'Ratones',
     address: 'Estrada Intendente Antônio Damasco, Ratones, Florianópolis – SC',
-    totalPlots: 900, 
+    totalPlots: 900,
     occupiedPlots: 680,
     totalQuadras: 9,
     plotsPerQuadra: 100,
@@ -263,12 +263,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério paroquial com área de 45.000 m²'
   },
-  { 
-    id: 10, 
-    name: 'RIBEIRÃO DA ILHA', 
-    location: 'Ribeirão da Ilha', 
+  {
+    id: 10,
+    name: 'RIBEIRÃO DA ILHA',
+    location: 'Ribeirão da Ilha',
     address: 'Rua Alberto Cavalheiro (atrás da igreja), Ribeirão da Ilha, Florianópolis – SC',
-    totalPlots: 1150, 
+    totalPlots: 1150,
     occupiedPlots: 890,
     totalQuadras: 11,
     plotsPerQuadra: 100,
@@ -283,12 +283,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério municipal com área de 55.000 m²'
   },
-  { 
-    id: 11, 
-    name: 'RIO VERMELHO', 
-    location: 'São João do Rio Vermelho', 
+  {
+    id: 11,
+    name: 'RIO VERMELHO',
+    location: 'São João do Rio Vermelho',
     address: 'Rodovia João Gualberto Soares, São João do Rio Vermelho, Florianópolis – SC',
-    totalPlots: 850, 
+    totalPlots: 850,
     occupiedPlots: 640,
     totalQuadras: 8,
     plotsPerQuadra: 100,
@@ -303,12 +303,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério particular com área de 40.000 m²'
   },
-  { 
-    id: 12, 
-    name: 'SANTO ANTÔNIO DE LISBOA', 
-    location: 'Santo Antônio de Lisboa', 
+  {
+    id: 12,
+    name: 'SANTO ANTÔNIO DE LISBOA',
+    location: 'Santo Antônio de Lisboa',
     address: 'Estrada Caminho dos Açores, nº 2450, Santo Antônio de Lisboa, Florianópolis – SC',
-    totalPlots: 1200, 
+    totalPlots: 1200,
     occupiedPlots: 920,
     totalQuadras: 12,
     plotsPerQuadra: 100,
@@ -323,12 +323,12 @@ const initialCemeteries: Cemetery[] = [
     openingHours: '08:00 - 18:00',
     notes: 'Cemitério paroquial com área de 50.000 m²'
   },
-  { 
-    id: 13, 
-    name: 'ARMAÇÃO', 
-    location: 'Armação', 
+  {
+    id: 13,
+    name: 'ARMAÇÃO',
+    location: 'Armação',
     address: 'Avenida Antônio Borges dos Santos (atrás da igreja), Armação, Florianópolis – SC',
-    totalPlots: 1000, 
+    totalPlots: 1000,
     occupiedPlots: 750,
     totalQuadras: 10,
     plotsPerQuadra: 100,
@@ -463,15 +463,15 @@ export function CemeteryDashboard() {
   const { user, logout, hasPermission } = useAuth();
   const { logs } = useLogs();
 
-  const filteredBurials = selectedCemetery === 'all' 
-    ? burials 
+  const filteredBurials = selectedCemetery === 'all'
+    ? burials
     : burials.filter(b => b.cemeteryId === selectedCemetery);
 
-  const filteredLeases = selectedCemetery === 'all' 
-    ? leases 
+  const filteredLeases = selectedCemetery === 'all'
+    ? leases
     : leases.filter(l => l.cemeteryId === selectedCemetery);
 
-  const selectedCemeteryData = selectedCemetery !== 'all' 
+  const selectedCemeteryData = selectedCemetery !== 'all'
     ? cemeteries.find(c => c.id === selectedCemetery)
     : null;
 
@@ -505,7 +505,7 @@ export function CemeteryDashboard() {
       const nextRegularizationYears = Math.ceil(yearsElapsed / 5) * 5;
       const nextRegularization = addYears(burialDate, nextRegularizationYears);
       const daysUntilNext = differenceInDays(nextRegularization, today);
-      
+
       if (daysUntilNext <= 90 && daysUntilNext >= -30) {
         count++;
       }
@@ -525,7 +525,7 @@ export function CemeteryDashboard() {
         const nextRegularizationYears = Math.ceil(yearsElapsed / 5) * 5;
         const nextRegularization = addYears(startDate, nextRegularizationYears);
         const daysUntilNext = differenceInDays(nextRegularization, today);
-        
+
         if (daysUntilNext <= 90 && daysUntilNext >= -30) {
           count++;
         }
@@ -617,8 +617,8 @@ export function CemeteryDashboard() {
             <p className="text-gray-600 mt-1">Gestão completa de sepultamentos e aforamentos</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowImport(true)}
               className="flex items-center gap-2"
             >
@@ -720,29 +720,29 @@ export function CemeteryDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="burials" className="space-y-4">
-          <TabsList className={`grid w-full ${hasPermission(['admin']) ? 'grid-cols-5' : 'grid-cols-3'} max-w-4xl`}>
+          <TabsList className={`grid w-full ${true ? 'grid-cols-5' : 'grid-cols-3'} max-w-4xl`}>
             <TabsTrigger value="burials">Sepultamentos</TabsTrigger>
             <TabsTrigger value="leases">Aforamentos</TabsTrigger>
             <TabsTrigger value="notifications" className="relative">
               Notificações
               {pendingNotifications > 0 && (
-                <Badge 
-                  variant="destructive" 
+                <Badge
+                  variant="destructive"
                   className="ml-2 h-5 min-w-5 px-1.5 text-xs"
                 >
                   {pendingNotifications}
                 </Badge>
               )}
             </TabsTrigger>
-            {hasPermission(['admin']) && (
+            {true && (
               <>
                 <TabsTrigger value="cemeteries">
                   Cemitérios
                 </TabsTrigger>
                 <TabsTrigger value="logs" className="relative">
                   Logs
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className="ml-2 h-5 min-w-5 px-1.5 text-xs"
                   >
                     {logs.length}

@@ -15,66 +15,36 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const { login } = useAuth();
   const { addLog } = useLogs();
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/test');
-      const text = await response.text();
-      console.log(text);
 
-      addLog('API_CALL', 'SYSTEM', {
-        details: 'Fetch ao carregar página',
-        success: true
-      });
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError('');
 
-    } catch (error) {
-      console.error('Erro ao buscar dados:', error);
+  if (!email || !password) {
+    setError('Por favor, preencha todos os campos');
+    return;
+  }
 
-      addLog('API_CALL', 'SYSTEM', {
-        details: 'Erro no fetch ao carregar página',
-        success: false
-      });
-    }
-  };
+  try {
+    await login(email, password);
 
-  fetchData();
-}, []);
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+    addLog('LOGIN', 'AUTHENTICATION', {
+      details: `Login bem-sucedido para ${email}`,
+      success: true
+    });
 
-    if (!email || !password) {
-      setError('Por favor, preencha todos os campos');
-      return;
-    }
+    window.location.href = '/dashboard';
 
-    const success = login(email, password);
-    if (success) {
-      addLog('LOGIN', 'AUTHENTICATION', {
-        details: `Login bem-sucedido para ${email}`,
-        success: true
-      });
-    } else {
-      setError('Email ou senha incorretos');
-      addLog('LOGIN', 'AUTHENTICATION', {
-        details: `Tentativa de login falhou para ${email}`,
-        success: false,
-        errorMessage: 'Credenciais inválidas'
-      });
-    }
-  };
+  } catch {
+    setError('Email ou senha incorretos');
 
-  const quickLogin = (userEmail: string, userPassword: string) => {
-    setEmail(userEmail);
-    setPassword(userPassword);
-    const success = login(userEmail, userPassword);
-    if (success) {
-      addLog('LOGIN', 'AUTHENTICATION', {
-        details: `Login rápido bem-sucedido para ${userEmail}`,
-        success: true
-      });
-    }
-  };
+    addLog('LOGIN', 'AUTHENTICATION', {
+      details: `Tentativa de login falhou para ${email}`,
+      success: false
+    });
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center p-4">
@@ -148,61 +118,6 @@ useEffect(() => {
           </CardContent>
         </Card>
 
-        {/* Quick Login Demo */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Acesso Rápido - Demo</CardTitle>
-            <CardDescription className="text-xs">
-              Clique para fazer login com usuários de teste
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full justify-start text-sm"
-              onClick={() => quickLogin('admin@cemiterios.com', 'admin123')}
-            >
-              <div className="flex items-center justify-between w-full">
-                <span>👑 Administrador</span>
-                <span className="text-xs text-gray-500">Acesso Total</span>
-              </div>
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-start text-sm"
-              onClick={() => quickLogin('moderador@cemiterios.com', 'mod123')}
-            >
-              <div className="flex items-center justify-between w-full">
-                <span>⚙️ Moderador</span>
-                <span className="text-xs text-gray-500">Gerenciar Registros</span>
-              </div>
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-start text-sm"
-              onClick={() => quickLogin('suporte@cemiterios.com', 'suporte123')}
-            >
-              <div className="flex items-center justify-between w-full">
-                <span>👤 Suporte</span>
-                <span className="text-xs text-gray-500">Visualizar Apenas</span>
-              </div>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Info Card */}
-        <Card className="bg-gray-50">
-          <CardContent className="pt-6">
-            <div className="text-xs text-gray-600 space-y-2">
-              <p className="font-semibold">Níveis de Acesso:</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
-                <li><strong>Admin:</strong> Acesso total, gerenciar cemitérios e usuários</li>
-                <li><strong>Moderador:</strong> Adicionar/editar sepultamentos e aforamentos</li>
-                <li><strong>Suporte:</strong> Visualizar registros e imprimir certificados</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

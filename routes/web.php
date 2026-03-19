@@ -4,37 +4,33 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SepultamentoController;
 use App\Http\Controllers\TestEmailController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
-// Route::get('/', function () {
-//     return auth()->check()
-//         ? redirect('/dashboard')
-//         : redirect('/login');
-// });
+use Illuminate\Http\Request;
+
+Route::post('/login', function (Request $request) {
+
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        return response()->json(['message' => 'Credenciais inválidas'], 401);
+    }
+
+    $request->session()->regenerate();
+
+    return response()->json([
+        'user' => Auth::user()
+    ]);
+});
+
+Route::middleware('auth')->get('/me', function (Request $request) {
+    return response()->json($request->user());
+});
+
+Route::post('/logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    return response()->json(['message' => 'Logout']);
+});
+
 Route::get('{any}', function () {
     return view('app');
 })->where('any', '^(?!api).*$');
-
-// Route::get('/dashboard', function () {
-//     return redirect()->route('sepultamentos.index');
-// })->middleware(['auth', 'verified'])->name('dashboard');
-//
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-//
-//     // Rotas para Sepultamentos
-//     Route::resource('sepultamentos', SepultamentoController::class);
-//     Route::get('sepultamentos/export/csv', [SepultamentoController::class, 'export'])->name('sepultamentos.export');
-//
-//     Route::resource('users', UserController::class);
-//     Route::get('/users', [UserController::class, 'index'])->name('users');
-//
-//
-//     // Rotas para Teste de Email
-//     Route::get('test-email', [TestEmailController::class, 'testForm'])->name('test.email.form');
-//     Route::get('test-email/api', [TestEmailController::class, 'test'])->name('test.email');
-//     Route::post('test-email/send', [TestEmailController::class, 'sendTest'])->name('test.email.send');
-// });
-
-require __DIR__.'/auth.php';
