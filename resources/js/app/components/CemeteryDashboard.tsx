@@ -18,6 +18,9 @@ import { ImportData } from '@/app/components/ImportData';
 import { differenceInDays, addYears, differenceInYears } from 'date-fns';
 import { useAuth, Permissions } from '@/contexts/AuthContext';
 import { useLogs } from '@/contexts/LogContext';
+import { useEffect } from 'react';
+import { getCemiterios } from '@/services/CemiterioService';
+
 
 export interface Cemetery {
   id: number;
@@ -82,268 +85,6 @@ export interface Lease {
   lastRegularizationDate?: string; // Data da última regularização
 }
 
-const initialCemeteries: Cemetery[] = [
-  {
-    id: 1,
-    name: 'SÃO FRANCISCO DE ASSIS',
-    location: 'Itacorubi',
-    address: 'Rua Pastor William Richard Schisler Filho, nº 452, Itacorubi, Florianópolis – SC',
-    totalPlots: 1500,
-    occupiedPlots: 1200,
-    totalQuadras: 15,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Municipal',
-    yearEstablished: 1950,
-    areaSize: 50000,
-    hasOssuary: true,
-    hasColumbarium: false,
-    responsibleName: 'João Silva',
-    responsiblePhone: '(11) 98888-7777',
-    email: 'joao.silva@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério municipal com área de 50.000 m²'
-  },
-  {
-    id: 2,
-    name: 'SÃO CRISTÓVÃO',
-    location: 'Capoeiras',
-    address: 'Rua São Cristóvão, Capoeiras, Florianópolis – SC',
-    totalPlots: 1200,
-    occupiedPlots: 890,
-    totalQuadras: 12,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Particular',
-    yearEstablished: 1980,
-    areaSize: 40000,
-    hasOssuary: false,
-    hasColumbarium: true,
-    responsibleName: 'Maria Oliveira',
-    responsiblePhone: '(11) 97777-6666',
-    email: 'maria.oliveira@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério particular com área de 40.000 m²'
-  },
-  {
-    id: 3,
-    name: 'BARRA DA LAGOA',
-    location: 'Fortaleza da Barra da Lagoa',
-    address: 'Rua Laurindo José de Souza, Fortaleza da Barra da Lagoa, Florianópolis – SC',
-    totalPlots: 800,
-    occupiedPlots: 650,
-    totalQuadras: 8,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Paroquial',
-    yearEstablished: 1970,
-    areaSize: 30000,
-    hasOssuary: true,
-    hasColumbarium: false,
-    responsibleName: 'Carlos Oliveira',
-    responsiblePhone: '(11) 98765-4321',
-    email: 'carlos.oliveira@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério paroquial com área de 30.000 m²'
-  },
-  {
-    id: 4,
-    name: 'CAMPECHE',
-    location: 'Campeche',
-    address: 'Rua da Capela, Campeche, Florianópolis',
-    totalPlots: 950,
-    occupiedPlots: 720,
-    totalQuadras: 9,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Municipal',
-    yearEstablished: 1960,
-    areaSize: 45000,
-    hasOssuary: false,
-    hasColumbarium: true,
-    responsibleName: 'Fernanda Fernandes',
-    responsiblePhone: '(11) 98888-7777',
-    email: 'fernanda.fernandes@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério municipal com área de 45.000 m²'
-  },
-  {
-    id: 5,
-    name: 'CANASVIEIRAS',
-    location: 'Canasvieiras',
-    address: 'Rodovia Teruliano Brito Xavier (atrás da Igreja de Santo Antônio de Paula), Canasvieiras, Florianópolis – SC',
-    totalPlots: 1100,
-    occupiedPlots: 850,
-    totalQuadras: 11,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Particular',
-    yearEstablished: 1990,
-    areaSize: 55000,
-    hasOssuary: true,
-    hasColumbarium: false,
-    responsibleName: 'Ana Paula Rodrigues',
-    responsiblePhone: '1122334455',
-    email: 'ana.paula@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério particular com área de 55.000 m²'
-  },
-  {
-    id: 6,
-    name: 'INGLESES/SANTINHO',
-    location: 'Ingleses (Santinho)',
-    address: 'Estrada Vereador Onildo Lemos, Ingleses (Santinho), Florianópolis – SC',
-    totalPlots: 1050,
-    occupiedPlots: 780,
-    totalQuadras: 10,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Paroquial',
-    yearEstablished: 1940,
-    areaSize: 40000,
-    hasOssuary: false,
-    hasColumbarium: true,
-    responsibleName: 'Roberto Carlos Lima',
-    responsiblePhone: '5544332211',
-    email: 'roberto.lima@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério paroquial com área de 40.000 m²'
-  },
-  {
-    id: 7,
-    name: 'LAGOA DA CONCEIÇÃO',
-    location: 'Lagoa da Conceição',
-    address: 'Rua Manoel Severino de Oliveira, Lagoa da Conceição, Florianópolis – SC',
-    totalPlots: 1300,
-    occupiedPlots: 1050,
-    totalQuadras: 13,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Municipal',
-    yearEstablished: 1930,
-    areaSize: 60000,
-    hasOssuary: true,
-    hasColumbarium: false,
-    responsibleName: 'Fernanda Souza Almeida',
-    responsiblePhone: '9988776655',
-    email: 'fernanda.souza@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério municipal com área de 60.000 m²'
-  },
-  {
-    id: 8,
-    name: 'PÂNTANO DO SUL',
-    location: 'Pântano do Sul',
-    address: 'Rua Sinfronio Manoel de Souza, Pântano do Sul, Florianópolis – SC',
-    totalPlots: 700,
-    occupiedPlots: 520,
-    totalQuadras: 7,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Particular',
-    yearEstablished: 1920,
-    areaSize: 35000,
-    hasOssuary: false,
-    hasColumbarium: true,
-    responsibleName: 'Pedro Santos',
-    responsiblePhone: '1122334455',
-    email: 'pedro.santos@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério particular com área de 35.000 m²'
-  },
-  {
-    id: 9,
-    name: 'RATONES',
-    location: 'Ratones',
-    address: 'Estrada Intendente Antônio Damasco, Ratones, Florianópolis – SC',
-    totalPlots: 900,
-    occupiedPlots: 680,
-    totalQuadras: 9,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Paroquial',
-    yearEstablished: 1910,
-    areaSize: 45000,
-    hasOssuary: true,
-    hasColumbarium: false,
-    responsibleName: 'Ana Maria',
-    responsiblePhone: '5544332211',
-    email: 'ana.maria@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério paroquial com área de 45.000 m²'
-  },
-  {
-    id: 10,
-    name: 'RIBEIRÃO DA ILHA',
-    location: 'Ribeirão da Ilha',
-    address: 'Rua Alberto Cavalheiro (atrás da igreja), Ribeirão da Ilha, Florianópolis – SC',
-    totalPlots: 1150,
-    occupiedPlots: 890,
-    totalQuadras: 11,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Municipal',
-    yearEstablished: 1900,
-    areaSize: 55000,
-    hasOssuary: false,
-    hasColumbarium: true,
-    responsibleName: 'João Pereira',
-    responsiblePhone: '1122334455',
-    email: 'joao.pereira@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério municipal com área de 55.000 m²'
-  },
-  {
-    id: 11,
-    name: 'RIO VERMELHO',
-    location: 'São João do Rio Vermelho',
-    address: 'Rodovia João Gualberto Soares, São João do Rio Vermelho, Florianópolis – SC',
-    totalPlots: 850,
-    occupiedPlots: 640,
-    totalQuadras: 8,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Particular',
-    yearEstablished: 1890,
-    areaSize: 40000,
-    hasOssuary: true,
-    hasColumbarium: false,
-    responsibleName: 'Maria Silva',
-    responsiblePhone: '(11) 98888-7777',
-    email: 'maria.silva@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério particular com área de 40.000 m²'
-  },
-  {
-    id: 12,
-    name: 'SANTO ANTÔNIO DE LISBOA',
-    location: 'Santo Antônio de Lisboa',
-    address: 'Estrada Caminho dos Açores, nº 2450, Santo Antônio de Lisboa, Florianópolis – SC',
-    totalPlots: 1200,
-    occupiedPlots: 920,
-    totalQuadras: 12,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Paroquial',
-    yearEstablished: 1880,
-    areaSize: 50000,
-    hasOssuary: false,
-    hasColumbarium: true,
-    responsibleName: 'Carlos Oliveira',
-    responsiblePhone: '(11) 97777-6666',
-    email: 'carlos.oliveira@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério paroquial com área de 50.000 m²'
-  },
-  {
-    id: 13,
-    name: 'ARMAÇÃO',
-    location: 'Armação',
-    address: 'Avenida Antônio Borges dos Santos (atrás da igreja), Armação, Florianópolis – SC',
-    totalPlots: 1000,
-    occupiedPlots: 750,
-    totalQuadras: 10,
-    plotsPerQuadra: 100,
-    cemeteryType: 'Municipal',
-    yearEstablished: 1870,
-    areaSize: 45000,
-    hasOssuary: true,
-    hasColumbarium: false,
-    responsibleName: 'Fernanda Fernandes',
-    responsiblePhone: '(11) 98765-4321',
-    email: 'fernanda.fernandes@cemiterio.com',
-    openingHours: '08:00 - 18:00',
-    notes: 'Cemitério municipal com área de 45.000 m²'
-  },
-];
 
 const mockBurials: Burial[] = [
   {
@@ -450,7 +191,7 @@ const mockLeases: Lease[] = [
 
 export function CemeteryDashboard() {
   const [selectedCemetery, setSelectedCemetery] = useState<number | 'all'>('all');
-  const [cemeteries, setCemeteries] = useState<Cemetery[]>(initialCemeteries);
+  const [cemeteries, setCemeteries] = useState<Cemetery[]>([]);
   const [burials, setBurials] = useState<Burial[]>(mockBurials);
   const [leases, setLeases] = useState<Lease[]>(mockLeases);
   const [showAddBurial, setShowAddBurial] = useState(false);
@@ -492,6 +233,18 @@ export function CemeteryDashboard() {
     : selectedCemeteryData?.totalPlots || 0;
 
   const occupancyRate = totalPlots > 0 ? ((totalOccupiedPlots / totalPlots) * 100).toFixed(1) : '0';
+
+useEffect( () => {
+   const fetchCemeteries = async () => {
+     try {
+        const data = await getCemiterios();
+        setCemeteries(data);
+     } catch (error) {
+        console.error('Erro ao buscar cemitérios:', error);
+     }
+   };
+   fetchCemeteries();
+}, []);
 
   // Calcular notificações pendentes
   const calculatePendingNotifications = () => {
