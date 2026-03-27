@@ -50,15 +50,18 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
     setEditForm(cemetery);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingId) return;
 
-    const updatedCemeteries = cemeteries.map(c =>
-      c.id === editingId ? { ...c, ...editForm } : c
-    );
-    onUpdate(updatedCemeteries);
-    setEditingId(null);
-    setEditForm({});
+    CemiteryService.updateCemiterio(editingId, editForm)
+    .then(updated => {
+        const updatedCemeteries = cemeteries.map(c =>
+              c.id === editingId ? { ...c, ...updated } : c
+        );
+        onUpdate(updatedCemeteries);
+        setEditingId(null);
+        setEditForm({});
+    });
   };
 
   const handleCancelEdit = () => {
@@ -73,7 +76,7 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
           await CemiteryService.deleteCemiterio(id);
           await loadCemeteries();
       } catch(err: any) {
-          alert(JSON.stringfy(err));
+          alert(JSON.stringify(err));
       }
     }
   };
