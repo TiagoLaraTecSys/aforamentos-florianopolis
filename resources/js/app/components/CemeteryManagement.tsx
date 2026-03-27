@@ -23,6 +23,7 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
   const [isAdding, setIsAdding] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Cemetery>>({});
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [updateErrors, setUpdateErrors] = useState<Record<string, string[]>>({})
   const [newCemetery, setNewCemetery] = useState<Omit<Cemetery, 'id'>>({
     name: '',
     location: '',
@@ -61,6 +62,12 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
         onUpdate(updatedCemeteries);
         setEditingId(null);
         setEditForm({});
+    }).catch(err => {
+        if (err.response?.status === 422) {
+            setUpdateErrors(err.response.data.errors);
+        } else {
+            alert('Erro inesperado ao salvar');
+        }
     });
   };
 
@@ -418,6 +425,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                               value={editForm.name || ''}
                               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                             />
+                            {updateErrors.name && (
+                              <p className="text-red-500 text-sm mt-1">{updateErrors.name[0]}</p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label>Localização/Bairro</Label>
