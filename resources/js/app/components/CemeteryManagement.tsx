@@ -9,7 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/app/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 import { Plus, Pencil, Trash2, Save, X, Building2, Info } from 'lucide-react';
-import type { Cemetery } from './CemeteryDashboard';
+import type { Cemetery, CreateCemiterioDTO } from '@/services/CemiterioService';
+import * as CemiteryService from '@/services/CemiterioService';
+import { useEffect } from 'react';
 
 interface CemeteryManagementProps {
   cemeteries: Cemetery[];
@@ -20,6 +22,7 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Cemetery>>({});
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [newCemetery, setNewCemetery] = useState<Omit<Cemetery, 'id'>>({
     name: '',
     location: '',
@@ -32,6 +35,15 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
     hasOssuary: false,
     hasColumbarium: false
   });
+
+  const loadCemeteries = async () => {
+    try {
+      const data = await CemiteryService.getCemiterios();
+      onUpdate(data);
+    } catch (error) {
+      console.error('Erro ao carregar cemitérios', error);
+    }
+  };
 
   const handleEdit = (cemetery: Cemetery) => {
     setEditingId(cemetery.id);
@@ -54,39 +66,45 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
     setEditForm({});
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir este cemitério? Todos os registros relacionados serão afetados.')) {
-      const updatedCemeteries = cemeteries.filter(c => c.id !== id);
-      onUpdate(updatedCemeteries);
+
+      try {
+          await CemiteryService.deleteCemiterio(id);
+          await loadCemeteries();
+      } catch(err: any) {
+          alert(JSON.stringfy(err));
+      }
     }
   };
 
-  const handleAdd = () => {
-    if (!newCemetery.name || !newCemetery.location || !newCemetery.address) {
-      alert('Por favor, preencha todos os campos obrigatórios');
-      return;
+  const handleAdd = async () => {
+      setIsAdding(true);
+    try {
+        await CemiteryService.createCemiterio(newCemetery);
+        await loadCemeteries();
+
+        setNewCemetery({
+          name: '',
+          location: '',
+          address: '',
+          totalPlots: 0,
+          occupiedPlots: 0,
+          totalQuadras: 0,
+          plotsPerQuadra: 0,
+          cemeteryType: 'Municipal',
+          hasOssuary: false,
+          hasColumbarium: false
+        });
+        setIsAdding(false);
+    } catch(err: any) {
+        if (err.response?.status === 422) {
+            setErrors(err.response.data.errors);
+        } else {
+            alert('Erro inesperado ao salvar');
+        }
     }
 
-    const maxId = Math.max(...cemeteries.map(c => c.id), 0);
-    const cemetery: Cemetery = {
-      ...newCemetery,
-      id: maxId + 1
-    };
-
-    onUpdate([...cemeteries, cemetery]);
-    setNewCemetery({
-      name: '',
-      location: '',
-      address: '',
-      totalPlots: 0,
-      occupiedPlots: 0,
-      totalQuadras: 0,
-      plotsPerQuadra: 0,
-      cemeteryType: 'Municipal',
-      hasOssuary: false,
-      hasColumbarium: false
-    });
-    setIsAdding(false);
   };
 
   const occupancyRate = (cemetery: Partial<Cemetery>) => {
@@ -137,6 +155,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, name: e.target.value })}
                           placeholder="Ex: SÃO FRANCISCO DE ASSIS"
                         />
+                        {errors.name && (
+                          <p className="text-red-500 text-sm mt-1">{errors.name[0]}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Localização/Bairro *</Label>
@@ -145,6 +166,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, location: e.target.value })}
                           placeholder="Ex: Itacorubi"
                         />
+                        {errors.location && (
+                           <p className="text-red-500 text-sm mt-1">{errors.location[0]}</p>
+                         )}
                       </div>
                     </div>
 
@@ -155,6 +179,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                         onChange={(e) => setNewCemetery({ ...newCemetery, address: e.target.value })}
                         placeholder="Ex: Rua Pastor William Richard Schisler Filho, nº 452, Itacorubi, Florianópolis – SC"
                       />
+                        {errors.address && (
+                           <p className="text-red-500 text-sm mt-1">{errors.address[0]}</p>
+                         )}
                     </div>
 
                     <div className="grid grid-cols-3 gap-4">
@@ -570,7 +597,7 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-gray-500">Ocupação</p>
-                        <Badge 
+                        <Badge
                           variant={
                             parseFloat(occupancyRate(cemetery)) > 80 ? 'destructive' :
                             parseFloat(occupancyRate(cemetery)) > 60 ? 'default' : 'secondary'

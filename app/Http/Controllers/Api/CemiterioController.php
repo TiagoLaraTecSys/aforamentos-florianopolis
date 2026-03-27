@@ -30,15 +30,20 @@ class CemiterioController extends Controller
                  'totalQuadras' => 'required|integer',
                  'plotsPerQuadra' => 'required|integer',
                  'cemeteryType' => 'required|string',
-                 'yearEstablished' => 'required|integer',
+                 'yearEstablished' => 'blank|integer',
                  'areaSize' => 'required|integer',
                  'hasOssuary' => 'required|boolean',
                  'hasColumbarium' => 'required|boolean',
-                 'responsibleName' => 'required|string',
-                 'responsiblePhone' => 'required|string',
-                 'email' => 'required|email',
-                 'openingHours' => 'required|string',
+                 'responsibleName' => 'nullable|string',
+                 'responsiblePhone' => 'nullable|string',
+                 'email' => 'nullable|email',
+                 'openingHours' => 'nullable|string',
                  'notes' => 'nullable|string'
+             ], [], [
+                    'name' => 'nome do cemitério',
+                    'location' => 'localização',
+                    'address' => 'endereço',
+                    'totalPlots' => 'total de jazigos',
              ]);
 
              $cemiterio = Cemiterio::create($data);
@@ -92,6 +97,9 @@ class CemiterioController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+       $cemiterio = Cemiterio::findOrFail($id);
+       $cemiterio->delete();
+
+       return response()->json(['message' => 'Deletado com sucesso']);
     }
 }

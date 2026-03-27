@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('responsiblePhone');
             $table->string('email');
             $table->string('openingHours');
-            $table->string('notes');
+            $table->text('notes')->nullable();
         });
     }
 
