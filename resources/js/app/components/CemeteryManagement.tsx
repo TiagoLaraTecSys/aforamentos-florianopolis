@@ -230,6 +230,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, areaSize: parseInt(e.target.value) || undefined })}
                           placeholder="Ex: 50000"
                         />
+                        {errors.areaSize && (
+                            <p className="text-red-500 text-sm mt-1">{errors.areaSize[0]}</p>
+                        )}
                       </div>
                     </div>
                   </TabsContent>
@@ -244,6 +247,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, totalQuadras: parseInt(e.target.value) || 0 })}
                           placeholder="Ex: 15"
                         />
+                        {errors.totalQuadras && (
+                            <p className="text-red-500 text-sm mt-1">{errors.totalQuadras[0]}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Sepulturas por Quadra</Label>
@@ -253,6 +259,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, plotsPerQuadra: parseInt(e.target.value) || undefined })}
                           placeholder="Ex: 100"
                         />
+                        {errors.plotsPerQuadra && (
+                            <p className="text-red-500 text-sm mt-1">{errors.plotsPerQuadra[0]}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Total de Jazigos</Label>
@@ -262,6 +271,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, totalPlots: parseInt(e.target.value) || 0 })}
                           placeholder="Ex: 1500"
                         />
+                        {errors.totalPlots && (
+                            <p className="text-red-500 text-sm mt-1">{errors.totalQuadras[0]}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Jazigos Ocupados</Label>
@@ -271,6 +283,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, occupiedPlots: parseInt(e.target.value) || 0 })}
                           placeholder="Ex: 1200"
                         />
+                        {errors.occupiedPlots && (
+                            <p className="text-red-500 text-sm mt-1">{errors.occupiedPlots[0]}</p>
+                        )}
                       </div>
                     </div>
 
@@ -311,6 +326,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, responsibleName: e.target.value || undefined })}
                           placeholder="Ex: João Silva"
                         />
+                        {errors.responsibleName && (
+                            <p className="text-red-500 text-sm mt-1">{errors.responsibleName[0]}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Telefone do Responsável</Label>
@@ -319,6 +337,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, responsiblePhone: e.target.value || undefined })}
                           placeholder="Ex: (48) 98888-7777"
                         />
+                        {errors.responsiblePhone && (
+                            <p className="text-red-500 text-sm mt-1">{errors.responsiblePhone[0]}</p>
+                        )}
                       </div>
                     </div>
 
@@ -331,6 +352,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, email: e.target.value || undefined })}
                           placeholder="Ex: contato@cemiterio.com"
                         />
+                        {errors.email && (
+                            <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Horário de Funcionamento</Label>
@@ -339,6 +363,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                           onChange={(e) => setNewCemetery({ ...newCemetery, openingHours: e.target.value || undefined })}
                           placeholder="Ex: 08:00 - 18:00"
                         />
+                        {errors.openingHours && (
+                            <p className="text-red-500 text-sm mt-1">{errors.openingHours[0]}</p>
+                        )}
                       </div>
                     </div>
 
