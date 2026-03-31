@@ -462,6 +462,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                               value={editForm.location || ''}
                               onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
                             />
+                            {updateErrors.location && (
+                                <p className="text-red-500 text-sm mt-1">{updateErrors.location[0]}</p>
+                            )}
                           </div>
                         </div>
 
@@ -471,6 +474,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                             value={editForm.address || ''}
                             onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
                           />
+                          {updateErrors.address && (
+                              <p className="text-red-500 text-sm mt-1">{updateErrors.address[0]}</p>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-3 gap-4">
@@ -499,6 +505,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                               value={editForm.yearEstablished || ''}
                               onChange={(e) => setEditForm({ ...editForm, yearEstablished: parseInt(e.target.value) || undefined })}
                             />
+                             {updateErrors.yearEstablished && (
+                                <p className="text-red-500 text-sm mt-1">{updateErrors.yearEstablished[0]}</p>
+                             )}
                           </div>
                           <div className="space-y-2">
                             <Label>Área (m²)</Label>
@@ -507,6 +516,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                               value={editForm.areaSize || ''}
                               onChange={(e) => setEditForm({ ...editForm, areaSize: parseInt(e.target.value) || undefined })}
                             />
+                            {updateErrors.areaSize && (
+                                <p className="text-red-500 text-sm mt-1">{updateErrors.areaSize[0]}</p>
+                                             )}
                           </div>
                         </div>
                       </TabsContent>
@@ -520,6 +532,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                               value={editForm.totalQuadras || 0}
                               onChange={(e) => setEditForm({ ...editForm, totalQuadras: parseInt(e.target.value) || 0 })}
                             />
+                            {updateErrors.totalQuadras && (
+                                <p className="text-red-500 text-sm mt-1">{updateErrors.totalQuadras[0]}</p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label>Sepulturas por Quadra</Label>
@@ -528,6 +543,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                               value={editForm.plotsPerQuadra || ''}
                               onChange={(e) => setEditForm({ ...editForm, plotsPerQuadra: parseInt(e.target.value) || undefined })}
                             />
+                            {updateErrors.plotsPerQuadra && (
+                                <p className="text-red-500 text-sm mt-1">{updateErrors.plotsPerQuadra[0]}</p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label>Total de Jazigos</Label>
@@ -536,6 +554,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                               value={editForm.totalPlots || 0}
                               onChange={(e) => setEditForm({ ...editForm, totalPlots: parseInt(e.target.value) || 0 })}
                             />
+                            {updateErrors.totalPlots && (
+                                <p className="text-red-500 text-sm mt-1">{updateErrors.totalPlots[0]}</p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label>Jazigos Ocupados</Label>
@@ -544,6 +565,9 @@ export function CemeteryManagement({ cemeteries, onUpdate }: CemeteryManagementP
                               value={editForm.occupiedPlots || 0}
                               onChange={(e) => setEditForm({ ...editForm, occupiedPlots: parseInt(e.target.value) || 0 })}
                             />
+                            {updateErrors.occupiedPlots && (
+                                <p className="text-red-500 text-sm mt-1">{updateErrors.occupiedPlots[0]}</p>
+                            )}
                           </div>
                         </div>
 
