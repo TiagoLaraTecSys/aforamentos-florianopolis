@@ -5,10 +5,11 @@ import { Label } from '@/app/components/ui/label';
 import { Textarea } from '@/app/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/components/ui/select';
 import type { Cemetery, Lease } from './CemeteryDashboard';
+import { extractFieldErrors } from '@/utils/formErrors';
 
 interface AddLeaseFormProps {
   cemeteries: Cemetery[];
-  onAdd: (lease: Omit<Lease, 'id'>) => void;
+  onAdd: (lease: Omit<Lease, 'id'>) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -32,35 +33,46 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
     lastRegularizationDate: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.cemeteryId || !formData.leaseholderName || !formData.quadra || !formData.plotNumber || 
-        !formData.sector || !formData.startDate || !formData.amount ||
-        !formData.responsibleName || !formData.responsiblePhone) {
-      alert('Por favor, preencha todos os campos obrigatórios');
-      return;
-    }
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
-    onAdd({
-      cemeteryId: parseInt(formData.cemeteryId),
-      leaseholderName: formData.leaseholderName,
-      quadra: formData.quadra,
-      plotNumber: formData.plotNumber,
-      sector: formData.sector,
-      leaseType: formData.leaseType,
-      startDate: formData.startDate,
-      expiryDate: formData.expiryDate || undefined,
-      status: formData.status,
-      amount: parseFloat(formData.amount),
-      responsibleName: formData.responsibleName,
-      responsiblePhone: formData.responsiblePhone,
-      notes: formData.notes,
-      regularizationPeriodYears: formData.regularizationPeriodYears,
-      nextRegularizationDate: formData.nextRegularizationDate || undefined,
-      lastRegularizationDate: formData.lastRegularizationDate || undefined
-    });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    setSubmitting(true);
+    try {
+      await onAdd({
+        cemeteryId: parseInt(formData.cemeteryId),
+        leaseholderName: formData.leaseholderName,
+        quadra: formData.quadra,
+        plotNumber: formData.plotNumber,
+        sector: formData.sector,
+        leaseType: formData.leaseType,
+        startDate: formData.startDate,
+        expiryDate: formData.expiryDate || undefined,
+        status: formData.status,
+        amount: parseFloat(formData.amount),
+        responsibleName: formData.responsibleName,
+        responsiblePhone: formData.responsiblePhone,
+        notes: formData.notes,
+        regularizationPeriodYears: formData.regularizationPeriodYears,
+        nextRegularizationDate: formData.nextRegularizationDate || undefined,
+        lastRegularizationDate: formData.lastRegularizationDate || undefined
+      });
+    } catch (error) {
+      const fieldErrors = extractFieldErrors(error);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors(fieldErrors);
+      } else {
+        console.error('Erro ao adicionar aforamento:', error);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const err = (field: string) =>
+    errors[field] ? <p className="text-sm text-red-600 mt-1">{errors[field]}</p> : null;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 border rounded-lg p-6 bg-white">
@@ -72,14 +84,14 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             value={formData.leaseholderName}
             onChange={(e) => setFormData({ ...formData, leaseholderName: e.target.value })}
             placeholder="Nome completo"
-            required
           />
+          {err('leaseholderName')}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="cemetery">Cemitério *</Label>
-          <Select 
-            value={formData.cemeteryId} 
+          <Select
+            value={formData.cemeteryId}
             onValueChange={(value) => setFormData({ ...formData, cemeteryId: value })}
           >
             <SelectTrigger>
@@ -93,6 +105,7 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
               ))}
             </SelectContent>
           </Select>
+          {err('cemeteryId')}
         </div>
 
         <div className="space-y-2">
@@ -102,8 +115,8 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             value={formData.sector}
             onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
             placeholder="Ex: Setor A"
-            required
           />
+          {err('sector')}
         </div>
 
         <div className="space-y-2">
@@ -113,8 +126,8 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             value={formData.quadra}
             onChange={(e) => setFormData({ ...formData, quadra: e.target.value })}
             placeholder="Ex: A"
-            required
           />
+          {err('quadra')}
         </div>
 
         <div className="space-y-2">
@@ -124,15 +137,15 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             value={formData.plotNumber}
             onChange={(e) => setFormData({ ...formData, plotNumber: e.target.value })}
             placeholder="Ex: A-456"
-            required
           />
+          {err('plotNumber')}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="leaseType">Tipo de Aforamento *</Label>
-          <Select 
-            value={formData.leaseType} 
-            onValueChange={(value: 'Perpétuo' | 'Temporário') => 
+          <Select
+            value={formData.leaseType}
+            onValueChange={(value: 'Perpétuo' | 'Temporário') =>
               setFormData({ ...formData, leaseType: value })
             }
           >
@@ -144,13 +157,14 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
               <SelectItem value="Temporário">Temporário</SelectItem>
             </SelectContent>
           </Select>
+          {err('leaseType')}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="status">Status *</Label>
-          <Select 
-            value={formData.status} 
-            onValueChange={(value: 'Ativo' | 'Vencido' | 'Renovado') => 
+          <Select
+            value={formData.status}
+            onValueChange={(value: 'Ativo' | 'Vencido' | 'Renovado') =>
               setFormData({ ...formData, status: value })
             }
           >
@@ -163,6 +177,7 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
               <SelectItem value="Renovado">Renovado</SelectItem>
             </SelectContent>
           </Select>
+          {err('status')}
         </div>
 
         <div className="space-y-2">
@@ -172,8 +187,8 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             type="date"
             value={formData.startDate}
             onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-            required
           />
+          {err('startDate')}
         </div>
 
         <div className="space-y-2">
@@ -184,6 +199,7 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             value={formData.expiryDate}
             onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
           />
+          {err('expiryDate')}
         </div>
 
         <div className="space-y-2">
@@ -195,8 +211,8 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             value={formData.amount}
             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
             placeholder="0.00"
-            required
           />
+          {err('amount')}
         </div>
 
         <div className="space-y-2">
@@ -206,8 +222,8 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             value={formData.responsibleName}
             onChange={(e) => setFormData({ ...formData, responsibleName: e.target.value })}
             placeholder="Nome completo"
-            required
           />
+          {err('responsibleName')}
         </div>
 
         <div className="space-y-2">
@@ -217,8 +233,8 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
             value={formData.responsiblePhone}
             onChange={(e) => setFormData({ ...formData, responsiblePhone: e.target.value })}
             placeholder="(XX) XXXX-XXXX"
-            required
           />
+          {err('responsiblePhone')}
         </div>
       </div>
 
@@ -231,6 +247,7 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
           placeholder="Informações adicionais..."
           rows={3}
         />
+        {err('notes')}
       </div>
 
       {/* Seção de Período de Validade/Regularização */}
@@ -284,8 +301,8 @@ export function AddLeaseForm({ cemeteries, onAdd, onCancel }: AddLeaseFormProps)
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit">
-          Adicionar Aforamento
+        <Button type="submit" disabled={submitting}>
+          {submitting ? 'Salvando...' : 'Adicionar Aforamento'}
         </Button>
       </div>
     </form>

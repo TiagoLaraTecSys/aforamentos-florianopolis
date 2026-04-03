@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('cemiterios', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('name')->unique();;
+            $table->string('name')->unique();
             $table->string('location');
             $table->string('address');
             $table->unsignedInteger('totalPlots');
@@ -22,14 +22,14 @@ return new class extends Migration
             $table->unsignedInteger('totalQuadras');
             $table->unsignedInteger('plotsPerQuadra');
             $table->string('cemeteryType');
-            $table->unsignedInteger('yearEstablished');
-            $table->unsignedInteger('areaSize');
+            $table->unsignedInteger('yearEstablished')->nullable();
+            $table->unsignedInteger('areaSize')->nullable();
             $table->boolean('hasOssuary');
             $table->boolean('hasColumbarium');
-            $table->string('responsibleName');
-            $table->string('responsiblePhone');
-            $table->string('email');
-            $table->string('openingHours');
+            $table->string('responsibleName')->nullable();
+            $table->string('responsiblePhone')->nullable();
+            $table->string('email')->nullable();
+            $table->string('openingHours')->nullable();
             $table->text('notes')->nullable();
         });
     }

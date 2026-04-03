@@ -5,10 +5,11 @@ import { Label } from '@/app/components/ui/label';
 import { Textarea } from '@/app/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/components/ui/select';
 import type { Cemetery, Burial } from './CemeteryDashboard';
+import { extractFieldErrors } from '@/utils/formErrors';
 
 interface AddBurialFormProps {
   cemeteries: Cemetery[];
-  onAdd: (burial: Omit<Burial, 'id'>) => void;
+  onAdd: (burial: Omit<Burial, 'id'>) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -34,37 +35,29 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
     lastRegularizationDate: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validações - apenas campos essenciais são obrigatórios
-    if (!formData.cemeteryId) {
-      alert('Selecione um cemitério');
-      return;
-    }
-    
-    if (!formData.galsc && !formData.burialNumber) {
-      alert('É obrigatório informar GALSC ou Número de Sepultamento');
-      return;
-    }
-    
-    if (!formData.deceasedName) {
-      alert('Nome do falecido é obrigatório');
-      return;
-    }
-    
-    if (!formData.burialDate) {
-      alert('Data de sepultamento é obrigatória');
-      return;
-    }
-    
-    if (!formData.quadra || !formData.plotNumber) {
-      alert('Quadra e número do jazigo são obrigatórios');
-      return;
-    }
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
-    onAdd(formData);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    setSubmitting(true);
+    try {
+      await onAdd(formData);
+    } catch (error) {
+      const fieldErrors = extractFieldErrors(error);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors(fieldErrors);
+      } else {
+        console.error('Erro ao adicionar sepultamento:', error);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const err = (field: string) =>
+    errors[field] ? <p className="text-sm text-red-600 mt-1">{errors[field]}</p> : null;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 border rounded-lg p-6 bg-white">
@@ -80,6 +73,7 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               onChange={(e) => setFormData({ ...formData, galsc: e.target.value })}
               placeholder="Ex: GALSC-2024-0001"
             />
+            {err('galsc')}
             <p className="text-xs text-gray-500">Sistema novo - nem todos possuem</p>
           </div>
 
@@ -91,6 +85,7 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               onChange={(e) => setFormData({ ...formData, burialNumber: e.target.value })}
               placeholder="Ex: 0001"
             />
+            {err('burialNumber')}
             <p className="text-xs text-gray-500">Específico deste cemitério</p>
           </div>
         </div>
@@ -110,14 +105,14 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               value={formData.deceasedName}
               onChange={(e) => setFormData({ ...formData, deceasedName: e.target.value })}
               placeholder="Nome completo"
-              required
             />
+            {err('deceasedName')}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="cemetery">Cemitério *</Label>
-            <Select 
-              value={formData.cemeteryId} 
+            <Select
+              value={formData.cemeteryId}
               onValueChange={(value) => setFormData({ ...formData, cemeteryId: value })}
             >
               <SelectTrigger>
@@ -131,6 +126,7 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
                 ))}
               </SelectContent>
             </Select>
+            {err('cemeteryId')}
           </div>
 
           <div className="space-y-2">
@@ -141,6 +137,7 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               value={formData.dateOfBirth}
               onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
             />
+            {err('dateOfBirth')}
           </div>
 
           <div className="space-y-2">
@@ -151,6 +148,7 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               value={formData.dateOfDeath}
               onChange={(e) => setFormData({ ...formData, dateOfDeath: e.target.value })}
             />
+            {err('dateOfDeath')}
           </div>
 
           <div className="space-y-2">
@@ -160,15 +158,15 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               type="date"
               value={formData.burialDate}
               onChange={(e) => setFormData({ ...formData, burialDate: e.target.value })}
-              required
             />
+            {err('burialDate')}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="burialType">Tipo de Sepultura *</Label>
-            <Select 
-              value={formData.burialType} 
-              onValueChange={(value: 'INUMAÇÃO' | 'TUMULAÇÃO(GAVETA)' | 'EXUMAÇÃO' | 'TRANSLADAÇÃO' | 'CREMAÇÃO' | 'REINUMAÇÃO' | 'OSSÁRIO') => 
+            <Select
+              value={formData.burialType}
+              onValueChange={(value: 'INUMAÇÃO' | 'TUMULAÇÃO(GAVETA)' | 'EXUMAÇÃO' | 'TRANSLADAÇÃO' | 'CREMAÇÃO' | 'REINUMAÇÃO' | 'OSSÁRIO') =>
                 setFormData({ ...formData, burialType: value })
               }
             >
@@ -185,13 +183,14 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
                 <SelectItem value="OSSÁRIO">OSSÁRIO</SelectItem>
               </SelectContent>
             </Select>
+            {err('burialType')}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="currentStatus">Estado Atual *</Label>
-            <Select 
-              value={formData.currentStatus} 
-              onValueChange={(value: 'Sepultado' | 'Exumado' | 'Transladado' | 'Cremado') => 
+            <Select
+              value={formData.currentStatus}
+              onValueChange={(value: 'Sepultado' | 'Exumado' | 'Transladado' | 'Cremado') =>
                 setFormData({ ...formData, currentStatus: value })
               }
             >
@@ -205,6 +204,7 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
                 <SelectItem value="Cremado">Cremado</SelectItem>
               </SelectContent>
             </Select>
+            {err('currentStatus')}
           </div>
         </div>
       </div>
@@ -220,8 +220,8 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               value={formData.quadra}
               onChange={(e) => setFormData({ ...formData, quadra: e.target.value })}
               placeholder="Ex: A"
-              required
             />
+            {err('quadra')}
           </div>
 
           <div className="space-y-2">
@@ -231,8 +231,8 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               value={formData.plotNumber}
               onChange={(e) => setFormData({ ...formData, plotNumber: e.target.value })}
               placeholder="Ex: 123"
-              required
             />
+            {err('plotNumber')}
           </div>
 
           <div className="space-y-2">
@@ -242,8 +242,8 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               value={formData.sector}
               onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
               placeholder="Ex: Setor A"
-              required
             />
+            {err('sector')}
           </div>
         </div>
       </div>
@@ -259,8 +259,8 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               value={formData.responsibleName}
               onChange={(e) => setFormData({ ...formData, responsibleName: e.target.value })}
               placeholder="Nome completo"
-              required
             />
+            {err('responsibleName')}
           </div>
 
           <div className="space-y-2">
@@ -270,8 +270,8 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
               value={formData.responsiblePhone}
               onChange={(e) => setFormData({ ...formData, responsiblePhone: e.target.value })}
               placeholder="Ex: (11) 99999-9999"
-              required
             />
+            {err('responsiblePhone')}
           </div>
         </div>
       </div>
@@ -285,6 +285,7 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
           placeholder="Informações adicionais..."
           rows={3}
         />
+        {err('notes')}
       </div>
 
       {/* Seção de Período de Validade/Regularização */}
@@ -336,8 +337,8 @@ export function AddBurialForm({ cemeteries, onAdd, onCancel }: AddBurialFormProp
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit">
-          Adicionar Sepultamento
+        <Button type="submit" disabled={submitting}>
+          {submitting ? 'Salvando...' : 'Adicionar Sepultamento'}
         </Button>
       </div>
     </form>

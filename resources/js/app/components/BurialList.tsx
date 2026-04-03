@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/components/ui/table';
 import { Badge } from '@/app/components/ui/badge';
 import { Button } from '@/app/components/ui/button';
-import { Trash2, FileText, Pencil } from 'lucide-react';
+import { Trash2, FileText, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { BurialHistory } from '@/app/components/BurialHistory';
@@ -11,11 +11,16 @@ import type { Burial, Cemetery } from './CemeteryDashboard';
 interface BurialListProps {
   burials: Burial[];
   cemeteries: Cemetery[];
+  loading?: boolean;
+  currentPage: number;
+  lastPage: number;
+  total: number;
+  onPageChange: (page: number) => void;
   onDelete: (id: number) => void;
   onEdit: (burial: Burial) => void;
 }
 
-export function BurialList({ burials, cemeteries, onDelete, onEdit }: BurialListProps) {
+export function BurialList({ burials, cemeteries, loading, currentPage, lastPage, total, onPageChange, onDelete, onEdit }: BurialListProps) {
   const getCemeteryName = (cemeteryId: number) => {
     return cemeteries.find(c => c.id === cemeteryId)?.name || 'Desconhecido';
   };
@@ -62,6 +67,14 @@ export function BurialList({ burials, cemeteries, onDelete, onEdit }: BurialList
     }
   };
 
+  if (loading) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
+
   if (burials.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
@@ -72,6 +85,7 @@ export function BurialList({ burials, cemeteries, onDelete, onEdit }: BurialList
   }
 
   return (
+    <div className="space-y-3">
     <div className="rounded-md border">
       <Table>
         <TableHeader>
@@ -161,6 +175,35 @@ export function BurialList({ burials, cemeteries, onDelete, onEdit }: BurialList
           })}
         </TableBody>
       </Table>
+    </div>
+
+    {/* Pagination */}
+    <div className="flex items-center justify-between px-1">
+      <p className="text-sm text-gray-500">
+        {total} sepultamento{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
+      </p>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage <= 1}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </Button>
+        <span className="text-sm text-gray-600">
+          Página {currentPage} de {lastPage}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage >= lastPage}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
     </div>
   );
 }

@@ -7,35 +7,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/app/components/ui/textarea';
 import { X, Save } from 'lucide-react';
 import type { Burial, Cemetery } from './CemeteryDashboard';
+import { extractFieldErrors } from '@/utils/formErrors';
 
 interface EditBurialFormProps {
   burial: Burial;
   cemeteries: Cemetery[];
-  onEdit: (burial: Burial) => void;
+  onEdit: (burial: Burial) => Promise<void>;
   onCancel: () => void;
 }
 
 export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBurialFormProps) {
   const [formData, setFormData] = useState<Burial>(burial);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validação: Pelo menos GALSC ou Número de Sepultamento deve estar preenchido
-    if (!formData.galsc && !formData.burialNumber) {
-      alert('É obrigatório preencher pelo menos o GALSC ou o Número de Sepultamento');
-      return;
+    setErrors({});
+    setSubmitting(true);
+    try {
+      await onEdit(formData);
+    } catch (error) {
+      const fieldErrors = extractFieldErrors(error);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors(fieldErrors);
+      } else {
+        console.error('Erro ao editar sepultamento:', error);
+      }
+    } finally {
+      setSubmitting(false);
     }
-
-    if (!formData.deceasedName || !formData.dateOfBirth || !formData.dateOfDeath || 
-        !formData.burialDate || !formData.quadra || !formData.plotNumber || 
-        !formData.sector || !formData.responsibleName || !formData.responsiblePhone) {
-      alert('Por favor, preencha todos os campos obrigatórios');
-      return;
-    }
-
-    onEdit(formData);
   };
+
+  const err = (field: string) =>
+    errors[field] ? <p className="text-sm text-red-600 mt-1">{errors[field]}</p> : null;
 
   return (
     <Card className="bg-blue-50 border-blue-200">
@@ -60,6 +65,7 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
                   onChange={(e) => setFormData({ ...formData, galsc: e.target.value || undefined })}
                   placeholder="Ex: GALSC-2024-0001"
                 />
+                {err('galsc')}
               </div>
               <div className="space-y-2">
                 <Label>Número de Sepultamento</Label>
@@ -68,6 +74,7 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
                   onChange={(e) => setFormData({ ...formData, burialNumber: e.target.value || undefined })}
                   placeholder="Ex: 0001"
                 />
+                {err('burialNumber')}
               </div>
             </div>
             <p className="text-sm text-gray-600">
@@ -81,38 +88,38 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
             <div className="space-y-2">
               <Label>Nome Completo *</Label>
               <Input
-                required
                 value={formData.deceasedName}
                 onChange={(e) => setFormData({ ...formData, deceasedName: e.target.value })}
               />
+              {err('deceasedName')}
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Data de Nascimento *</Label>
+                <Label>Data de Nascimento</Label>
                 <Input
-                  required
                   type="date"
                   value={formData.dateOfBirth}
                   onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                 />
+                {err('dateOfBirth')}
               </div>
               <div className="space-y-2">
-                <Label>Data de Falecimento *</Label>
+                <Label>Data de Falecimento</Label>
                 <Input
-                  required
                   type="date"
                   value={formData.dateOfDeath}
                   onChange={(e) => setFormData({ ...formData, dateOfDeath: e.target.value })}
                 />
+                {err('dateOfDeath')}
               </div>
               <div className="space-y-2">
                 <Label>Data do Sepultamento *</Label>
                 <Input
-                  required
                   type="date"
                   value={formData.burialDate}
                   onChange={(e) => setFormData({ ...formData, burialDate: e.target.value })}
                 />
+                {err('burialDate')}
               </div>
             </div>
           </div>
@@ -137,34 +144,35 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
                   ))}
                 </SelectContent>
               </Select>
+              {err('cemeteryId')}
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Quadra *</Label>
                 <Input
-                  required
                   value={formData.quadra}
                   onChange={(e) => setFormData({ ...formData, quadra: e.target.value })}
                   placeholder="Ex: A"
                 />
+                {err('quadra')}
               </div>
               <div className="space-y-2">
                 <Label>Sepultura *</Label>
                 <Input
-                  required
                   value={formData.plotNumber}
                   onChange={(e) => setFormData({ ...formData, plotNumber: e.target.value })}
                   placeholder="Ex: 123"
                 />
+                {err('plotNumber')}
               </div>
               <div className="space-y-2">
                 <Label>Setor *</Label>
                 <Input
-                  required
                   value={formData.sector}
                   onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
                   placeholder="Ex: Setor A"
                 />
+                {err('sector')}
               </div>
             </div>
           </div>
@@ -192,6 +200,7 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
                     <SelectItem value="OSSÁRIO">OSSÁRIO</SelectItem>
                   </SelectContent>
                 </Select>
+                {err('burialType')}
               </div>
               <div className="space-y-2">
                 <Label>Estado Atual *</Label>
@@ -209,6 +218,7 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
                     <SelectItem value="Cremado">Cremado</SelectItem>
                   </SelectContent>
                 </Select>
+                {err('currentStatus')}
               </div>
             </div>
           </div>
@@ -220,18 +230,18 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
               <div className="space-y-2">
                 <Label>Nome do Responsável *</Label>
                 <Input
-                  required
                   value={formData.responsibleName}
                   onChange={(e) => setFormData({ ...formData, responsibleName: e.target.value })}
                 />
+                {err('responsibleName')}
               </div>
               <div className="space-y-2">
                 <Label>Telefone do Responsável *</Label>
                 <Input
-                  required
                   value={formData.responsiblePhone}
                   onChange={(e) => setFormData({ ...formData, responsiblePhone: e.target.value })}
                 />
+                {err('responsiblePhone')}
               </div>
             </div>
           </div>
@@ -244,6 +254,7 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
             />
+            {err('notes')}
           </div>
 
           {/* Regularização */}
@@ -283,9 +294,9 @@ export function EditBurialForm({ burial, cemeteries, onEdit, onCancel }: EditBur
 
           {/* Botões */}
           <div className="flex gap-2">
-            <Button type="submit">
+            <Button type="submit" disabled={submitting}>
               <Save className="w-4 h-4 mr-2" />
-              Salvar Alterações
+              {submitting ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancelar

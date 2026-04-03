@@ -7,29 +7,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/app/components/ui/textarea';
 import { X, Save } from 'lucide-react';
 import type { Lease, Cemetery } from './CemeteryDashboard';
+import { extractFieldErrors } from '@/utils/formErrors';
 
 interface EditLeaseFormProps {
   lease: Lease;
   cemeteries: Cemetery[];
-  onEdit: (lease: Lease) => void;
+  onEdit: (lease: Lease) => Promise<void>;
   onCancel: () => void;
 }
 
 export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLeaseFormProps) {
   const [formData, setFormData] = useState<Lease>(lease);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.leaseholderName || !formData.quadra || !formData.plotNumber || 
-        !formData.sector || !formData.startDate || !formData.amount ||
-        !formData.responsibleName || !formData.responsiblePhone) {
-      alert('Por favor, preencha todos os campos obrigatórios');
-      return;
+    setErrors({});
+    setSubmitting(true);
+    try {
+      await onEdit(formData);
+    } catch (error) {
+      const fieldErrors = extractFieldErrors(error);
+      if (Object.keys(fieldErrors).length > 0) {
+        setErrors(fieldErrors);
+      } else {
+        console.error('Erro ao editar aforamento:', error);
+      }
+    } finally {
+      setSubmitting(false);
     }
-
-    onEdit(formData);
   };
+
+  const err = (field: string) =>
+    errors[field] ? <p className="text-sm text-red-600 mt-1">{errors[field]}</p> : null;
 
   return (
     <Card className="bg-blue-50 border-blue-200">
@@ -49,10 +60,10 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
             <div className="space-y-2">
               <Label>Nome do Titular *</Label>
               <Input
-                required
                 value={formData.leaseholderName}
                 onChange={(e) => setFormData({ ...formData, leaseholderName: e.target.value })}
               />
+              {err('leaseholderName')}
             </div>
           </div>
 
@@ -76,34 +87,35 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
                   ))}
                 </SelectContent>
               </Select>
+              {err('cemeteryId')}
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Quadra *</Label>
                 <Input
-                  required
                   value={formData.quadra}
                   onChange={(e) => setFormData({ ...formData, quadra: e.target.value })}
                   placeholder="Ex: A"
                 />
+                {err('quadra')}
               </div>
               <div className="space-y-2">
                 <Label>Jazigo *</Label>
                 <Input
-                  required
                   value={formData.plotNumber}
                   onChange={(e) => setFormData({ ...formData, plotNumber: e.target.value })}
                   placeholder="Ex: A-456"
                 />
+                {err('plotNumber')}
               </div>
               <div className="space-y-2">
                 <Label>Setor *</Label>
                 <Input
-                  required
                   value={formData.sector}
                   onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
                   placeholder="Ex: Setor A"
                 />
+                {err('sector')}
               </div>
             </div>
           </div>
@@ -116,7 +128,7 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
                 <Label>Tipo *</Label>
                 <Select
                   value={formData.leaseType}
-                  onValueChange={(value: 'Perpétuo' | 'Temporário') => 
+                  onValueChange={(value: 'Perpétuo' | 'Temporário') =>
                     setFormData({ ...formData, leaseType: value })
                   }
                 >
@@ -128,6 +140,7 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
                     <SelectItem value="Temporário">Temporário</SelectItem>
                   </SelectContent>
                 </Select>
+                {err('leaseType')}
               </div>
               <div className="space-y-2">
                 <Label>Status *</Label>
@@ -144,6 +157,7 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
                     <SelectItem value="Renovado">Renovado</SelectItem>
                   </SelectContent>
                 </Select>
+                {err('status')}
               </div>
             </div>
           </div>
@@ -155,11 +169,11 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
               <div className="space-y-2">
                 <Label>Data de Início *</Label>
                 <Input
-                  required
                   type="date"
                   value={formData.startDate}
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                 />
+                {err('startDate')}
               </div>
               <div className="space-y-2">
                 <Label>Data de Vencimento</Label>
@@ -169,16 +183,17 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
                   onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value || undefined })}
                   disabled={formData.leaseType === 'Perpétuo'}
                 />
+                {err('expiryDate')}
               </div>
               <div className="space-y-2">
                 <Label>Valor (R$) *</Label>
                 <Input
-                  required
                   type="number"
                   step="0.01"
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) })}
                 />
+                {err('amount')}
               </div>
             </div>
           </div>
@@ -190,18 +205,18 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
               <div className="space-y-2">
                 <Label>Nome do Responsável *</Label>
                 <Input
-                  required
                   value={formData.responsibleName}
                   onChange={(e) => setFormData({ ...formData, responsibleName: e.target.value })}
                 />
+                {err('responsibleName')}
               </div>
               <div className="space-y-2">
                 <Label>Telefone do Responsável *</Label>
                 <Input
-                  required
                   value={formData.responsiblePhone}
                   onChange={(e) => setFormData({ ...formData, responsiblePhone: e.target.value })}
                 />
+                {err('responsiblePhone')}
               </div>
             </div>
           </div>
@@ -214,6 +229,7 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
             />
+            {err('notes')}
           </div>
 
           {/* Regularização (para aforamentos perpétuos) */}
@@ -255,9 +271,9 @@ export function EditLeaseForm({ lease, cemeteries, onEdit, onCancel }: EditLease
 
           {/* Botões */}
           <div className="flex gap-2">
-            <Button type="submit">
+            <Button type="submit" disabled={submitting}>
               <Save className="w-4 h-4 mr-2" />
-              Salvar Alterações
+              {submitting ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancelar

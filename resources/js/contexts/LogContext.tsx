@@ -85,7 +85,7 @@ export function LogProvider({ children }: { children: ReactNode }) {
       timestamp: new Date(),
       userId: user.id,
       userName: user.name,
-      userRole: user.role,
+      userRole: user.roles?.[0] ?? '',
       action,
       category,
       target: details?.target,

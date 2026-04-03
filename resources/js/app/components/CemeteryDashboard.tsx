@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building2, Users, FileText, TrendingUp, Bell, LogOut, Settings, Activity, Upload } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Button } from '@/app/components/ui/button';
@@ -15,11 +15,13 @@ import { NotificationsTab } from './NotificationsTab';
 import { CemeteryManagement } from './CemeteryManagement';
 import { SystemLogs } from '@/app/components/SystemLogs';
 import { ImportData } from '@/app/components/ImportData';
-import { differenceInDays, addYears, differenceInYears } from 'date-fns';
 import { useAuth, Permissions } from '@/contexts/AuthContext';
 import { useLogs } from '@/contexts/LogContext';
-import { useEffect } from 'react';
 import { getCemiterios } from '@/services/CemiterioService';
+import { getBurials, createBurial, updateBurial, deleteBurial } from '@/services/BurialService';
+import { getLeases, createLease, updateLease, deleteLease } from '@/services/LeaseService';
+import { apiBurialToFe, feBurialToApi, apiLeaseToFe, feLeaseToApi } from '@/utils/mappers';
+import { getRegularizationsCount } from '@/services/RegularizationService';
 
 
 export interface Cemetery {
@@ -86,143 +88,41 @@ export interface Lease {
 }
 
 
-const mockBurials: Burial[] = [
-  {
-    id: 1,
-    cemeteryId: 1,
-    galsc: 'GALSC-2024-0001',
-    burialNumber: '0001',
-    deceasedName: 'João Silva Santos',
-    dateOfBirth: '1945-03-15',
-    dateOfDeath: '2024-12-10',
-    burialDate: '2024-12-12',
-    quadra: 'A',
-    plotNumber: '123',
-    sector: 'Setor A',
-    burialType: 'INUMAÇÃO',
-    currentStatus: 'Sepultado',
-    responsibleName: 'Maria Silva',
-    responsiblePhone: '(11) 98888-7777',
-    notes: 'Sepultamento realizado conforme solicitação da família'
-  },
-  {
-    id: 2,
-    cemeteryId: 2,
-    burialNumber: '0045',
-    deceasedName: 'Maria Oliveira Costa',
-    dateOfBirth: '1952-08-22',
-    dateOfDeath: '2024-11-25',
-    burialDate: '2024-11-27',
-    quadra: 'B',
-    plotNumber: '045',
-    sector: 'Setor B',
-    burialType: 'TUMULAÇÃO(GAVETA)',
-    currentStatus: 'Sepultado',
-    responsibleName: 'Carlos Oliveira',
-    responsiblePhone: '(11) 97777-6666',
-    notes: 'Jazigo familiar - 6 gavetas'
-  },
-  {
-    id: 3,
-    cemeteryId: 1,
-    galsc: 'GALSC-2025-0001',
-    burialNumber: '0002',
-    deceasedName: 'Carlos Alberto Fernandes',
-    dateOfBirth: '1938-11-05',
-    dateOfDeath: '2025-01-05',
-    burialDate: '2025-01-07',
-    quadra: 'C',
-    plotNumber: '234',
-    sector: 'Setor C',
-    burialType: 'INUMAÇÃO',
-    currentStatus: 'Sepultado',
-    responsibleName: 'Fernanda Fernandes',
-    responsiblePhone: '(11) 98765-4321'
-  }
-];
 
-const mockLeases: Lease[] = [
-  {
-    id: 1,
-    cemeteryId: 1,
-    leaseholderName: 'Ana Paula Rodrigues',
-    quadra: 'A',
-    plotNumber: 'A-456',
-    sector: 'Setor A',
-    leaseType: 'Perpétuo',
-    startDate: '2020-05-10',
-    status: 'Ativo',
-    amount: 5000,
-    responsibleName: 'João Pereira',
-    responsiblePhone: '1122334455',
-    notes: 'Aforamento perpétuo - documentação completa'
-  },
-  {
-    id: 2,
-    cemeteryId: 3,
-    leaseholderName: 'Roberto Carlos Lima',
-    quadra: 'D',
-    plotNumber: 'D-089',
-    sector: 'Setor D',
-    leaseType: 'Temporário',
-    startDate: '2023-03-15',
-    expiryDate: '2028-03-15',
-    status: 'Ativo',
-    amount: 1500,
-    responsibleName: 'Ana Maria',
-    responsiblePhone: '5544332211',
-    notes: 'Aforamento temporário - 5 anos'
-  },
-  {
-    id: 3,
-    cemeteryId: 2,
-    leaseholderName: 'Fernanda Souza Almeida',
-    quadra: 'E',
-    plotNumber: 'E-122',
-    sector: 'Setor E',
-    leaseType: 'Perpétuo',
-    startDate: '2015-09-20',
-    status: 'Ativo',
-    amount: 4500,
-    responsibleName: 'Pedro Santos',
-    responsiblePhone: '9988776655'
-  }
-];
+const PER_PAGE = 15;
 
 export function CemeteryDashboard() {
   const [selectedCemetery, setSelectedCemetery] = useState<number | 'all'>('all');
   const [cemeteries, setCemeteries] = useState<Cemetery[]>([]);
-  const [burials, setBurials] = useState<Burial[]>(mockBurials);
-  const [leases, setLeases] = useState<Lease[]>(mockLeases);
+
+  // Burials pagination
+  const [burials, setBurials] = useState<Burial[]>([]);
+  const [burialPage, setBurialPage] = useState(1);
+  const [burialMeta, setBurialMeta] = useState({ total: 0, last_page: 1 });
+  const [burialLoading, setBurialLoading] = useState(false);
+  const [burialRefresh, setBurialRefresh] = useState(0);
+
+  // Leases pagination
+  const [leases, setLeases] = useState<Lease[]>([]);
+  const [leasePage, setLeasePage] = useState(1);
+  const [leaseMeta, setLeaseMeta] = useState({ total: 0, last_page: 1 });
+  const [leaseLoading, setLeaseLoading] = useState(false);
+  const [leaseRefresh, setLeaseRefresh] = useState(0);
+
   const [showAddBurial, setShowAddBurial] = useState(false);
   const [showAddLease, setShowAddLease] = useState(false);
   const [showEditBurial, setShowEditBurial] = useState<Burial | null>(null);
   const [showEditLease, setShowEditLease] = useState<Lease | null>(null);
   const [showCemeteryManagement, setShowCemeteryManagement] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [regularizationCount, setRegularizationCount] = useState(0);
 
   const { user, logout, hasPermission } = useAuth();
   const { logs } = useLogs();
 
-  const filteredBurials = selectedCemetery === 'all'
-    ? burials
-    : burials.filter(b => b.cemeteryId === selectedCemetery);
-
-  const filteredLeases = selectedCemetery === 'all'
-    ? leases
-    : leases.filter(l => l.cemeteryId === selectedCemetery);
-
   const selectedCemeteryData = selectedCemetery !== 'all'
     ? cemeteries.find(c => c.id === selectedCemetery)
     : null;
-
-  const totalBurials = selectedCemetery === 'all'
-    ? burials.length
-    : burials.filter(b => b.cemeteryId === selectedCemetery).length;
-
-  const totalLeases = selectedCemetery === 'all'
-    ? leases.length
-    : leases.filter(l => l.cemeteryId === selectedCemetery).length;
 
   const totalOccupiedPlots = selectedCemetery === 'all'
     ? cemeteries.reduce((sum, c) => sum + c.occupiedPlots, 0)
@@ -234,114 +134,148 @@ export function CemeteryDashboard() {
 
   const occupancyRate = totalPlots > 0 ? ((totalOccupiedPlots / totalPlots) * 100).toFixed(1) : '0';
 
-useEffect( () => {
-   const fetchCemeteries = async () => {
-     try {
-        const data = await getCemiterios();
-        setCemeteries(data);
-     } catch (error) {
-        console.error('Erro ao buscar cemitérios:', error);
-     }
-   };
-   fetchCemeteries();
-}, []);
+  // Fetch cemeteries once
+  useEffect(() => {
+    getCemiterios()
+      .then(setCemeteries)
+      .catch(err => console.error('Erro ao buscar cemitérios:', err));
+  }, []);
 
-  // Calcular notificações pendentes
-  const calculatePendingNotifications = () => {
-    let count = 0;
-    const today = new Date();
+  // Re-fetch burials when cemetery filter, page, or refresh counter changes
+  useEffect(() => {
+    setBurialLoading(true);
+    getBurials({
+      cemetery_id: selectedCemetery === 'all' ? undefined : selectedCemetery,
+      page: burialPage,
+      per_page: PER_PAGE,
+    })
+      .then(res => {
+        setBurials(res.data.map(apiBurialToFe));
+        setBurialMeta({ total: res.total, last_page: res.last_page });
+      })
+      .catch(err => console.error('Erro ao buscar sepultamentos:', err))
+      .finally(() => setBurialLoading(false));
+  }, [selectedCemetery, burialPage, burialRefresh]);
 
-    // Verificar sepultamentos
-    burials.forEach(burial => {
-      const burialDate = new Date(burial.burialDate);
-      const yearsElapsed = differenceInYears(today, burialDate);
-      const nextRegularizationYears = Math.ceil(yearsElapsed / 5) * 5;
-      const nextRegularization = addYears(burialDate, nextRegularizationYears);
-      const daysUntilNext = differenceInDays(nextRegularization, today);
+  // Re-fetch leases when cemetery filter, page, or refresh counter changes
+  useEffect(() => {
+    setLeaseLoading(true);
+    getLeases({
+      cemetery_id: selectedCemetery === 'all' ? undefined : selectedCemetery,
+      page: leasePage,
+      per_page: PER_PAGE,
+    })
+      .then(res => {
+        setLeases(res.data.map(apiLeaseToFe));
+        setLeaseMeta({ total: res.total, last_page: res.last_page });
+      })
+      .catch(err => console.error('Erro ao buscar aforamentos:', err))
+      .finally(() => setLeaseLoading(false));
+  }, [selectedCemetery, leasePage, leaseRefresh]);
 
-      if (daysUntilNext <= 90 && daysUntilNext >= -30) {
-        count++;
-      }
-    });
+  // Re-fetch regularization count when cemetery filter or refresh counters change
+  useEffect(() => {
+    const cemeteryId = selectedCemetery !== 'all' ? selectedCemetery : undefined;
+    getRegularizationsCount(cemeteryId)
+      .then(setRegularizationCount)
+      .catch(err => console.error('Erro ao buscar contagem de regularizações:', err));
+  }, [selectedCemetery, burialRefresh, leaseRefresh]);
 
-    // Verificar aforamentos
-    leases.forEach(lease => {
-      if (lease.leaseType === 'Temporário' && lease.expiryDate) {
-        const expiryDate = new Date(lease.expiryDate);
-        const daysUntilExpiry = differenceInDays(expiryDate, today);
-        if (daysUntilExpiry <= 90) {
-          count++;
-        }
-      } else if (lease.leaseType === 'Perpétuo') {
-        const startDate = new Date(lease.startDate);
-        const yearsElapsed = differenceInYears(today, startDate);
-        const nextRegularizationYears = Math.ceil(yearsElapsed / 5) * 5;
-        const nextRegularization = addYears(startDate, nextRegularizationYears);
-        const daysUntilNext = differenceInDays(nextRegularization, today);
-
-        if (daysUntilNext <= 90 && daysUntilNext >= -30) {
-          count++;
-        }
-      }
-    });
-
-    return count;
+  // Reset pages when cemetery filter changes
+  const handleCemeteryChange = (value: number | 'all') => {
+    setSelectedCemetery(value);
+    setBurialPage(1);
+    setLeasePage(1);
   };
 
-  const pendingNotifications = calculatePendingNotifications();
 
-  const handleAddBurial = (burial: Omit<Burial, 'id'>) => {
-    const newBurial: Burial = {
-      ...burial,
-      id: Math.max(...burials.map(b => b.id), 0) + 1
-    };
-    setBurials([...burials, newBurial]);
+
+  const handleAddBurial = async (burial: Omit<Burial, 'id'>) => {
+    const result = await createBurial(feBurialToApi(burial));
+    if ('status' in result && result.status === 'pendente') {
+      alert(result.message);
+    } else {
+      setBurialRefresh(n => n + 1);
+    }
     setShowAddBurial(false);
   };
 
-  const handleAddLease = (lease: Omit<Lease, 'id'>) => {
-    const newLease: Lease = {
-      ...lease,
-      id: Math.max(...leases.map(l => l.id), 0) + 1
-    };
-    setLeases([...leases, newLease]);
+  const handleAddLease = async (lease: Omit<Lease, 'id'>) => {
+    const result = await createLease(feLeaseToApi(lease));
+    if ('status' in result && result.status === 'pendente') {
+      alert(result.message);
+    } else {
+      setLeaseRefresh(n => n + 1);
+    }
     setShowAddLease(false);
   };
 
-  const handleDeleteBurial = (id: number) => {
-    setBurials(burials.filter(b => b.id !== id));
+  const handleDeleteBurial = async (id: number) => {
+    try {
+      const result = await deleteBurial(id);
+      if (result && 'status' in result && result.status === 'pendente') {
+        alert(result.message);
+      } else {
+        setBurialRefresh(n => n + 1);
+      }
+    } catch (error) {
+      console.error('Erro ao excluir sepultamento:', error);
+    }
   };
 
-  const handleDeleteLease = (id: number) => {
-    setLeases(leases.filter(l => l.id !== id));
+  const handleDeleteLease = async (id: number) => {
+    try {
+      const result = await deleteLease(id);
+      if (result && 'status' in result && result.status === 'pendente') {
+        alert(result.message);
+      } else {
+        setLeaseRefresh(n => n + 1);
+      }
+    } catch (error) {
+      console.error('Erro ao excluir aforamento:', error);
+    }
   };
 
-  const handleEditBurial = (burial: Burial) => {
-    setBurials(burials.map(b => (b.id === burial.id ? burial : b)));
+  const handleEditBurial = async (burial: Burial) => {
+    const { id, ...rest } = burial;
+    const result = await updateBurial(id, feBurialToApi(rest));
+    if ('status' in result && result.status === 'pendente') {
+      alert(result.message);
+    } else {
+      setBurialRefresh(n => n + 1);
+    }
     setShowEditBurial(null);
   };
 
-  const handleEditLease = (lease: Lease) => {
-    setLeases(leases.map(l => (l.id === lease.id ? lease : l)));
+  const handleEditLease = async (lease: Lease) => {
+    const { id, ...rest } = lease;
+    const result = await updateLease(id, feLeaseToApi(rest));
+    if ('status' in result && result.status === 'pendente') {
+      alert(result.message);
+    } else {
+      setLeaseRefresh(n => n + 1);
+    }
     setShowEditLease(null);
   };
 
-  const handleImportBurials = (newBurials: Omit<Burial, 'id'>[]) => {
-    const maxId = Math.max(...burials.map(b => b.id), 0);
-    const burialsWithIds = newBurials.map((burial, index) => ({
-      ...burial,
-      id: maxId + index + 1
-    }));
-    setBurials([...burials, ...burialsWithIds]);
+  const handleImportBurials = async (newBurials: Omit<Burial, 'id'>[]) => {
+    try {
+      await Promise.all(newBurials.map(b => createBurial(feBurialToApi(b))));
+      setBurialPage(1);
+      setBurialRefresh(n => n + 1);
+    } catch (error) {
+      console.error('Erro ao importar sepultamentos:', error);
+    }
   };
 
-  const handleImportLeases = (newLeases: Omit<Lease, 'id'>[]) => {
-    const maxId = Math.max(...leases.map(l => l.id), 0);
-    const leasesWithIds = newLeases.map((lease, index) => ({
-      ...lease,
-      id: maxId + index + 1
-    }));
-    setLeases([...leases, ...leasesWithIds]);
+  const handleImportLeases = async (newLeases: Omit<Lease, 'id'>[]) => {
+    try {
+      await Promise.all(newLeases.map(l => createLease(feLeaseToApi(l))));
+      setLeasePage(1);
+      setLeaseRefresh(n => n + 1);
+    } catch (error) {
+      console.error('Erro ao importar aforamentos:', error);
+    }
   };
 
   // Renderizar tela de importação se estiver ativa
@@ -397,7 +331,7 @@ useEffect( () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
               <Button
                 variant={selectedCemetery === 'all' ? 'default' : 'outline'}
-                onClick={() => setSelectedCemetery('all')}
+                onClick={() => handleCemeteryChange('all')}
                 className="justify-start"
               >
                 Todos os Cemitérios
@@ -406,7 +340,7 @@ useEffect( () => {
                 <Button
                   key={cemetery.id}
                   variant={selectedCemetery === cemetery.id ? 'default' : 'outline'}
-                  onClick={() => setSelectedCemetery(cemetery.id)}
+                  onClick={() => handleCemeteryChange(cemetery.id)}
                   className="justify-start"
                 >
                   {cemetery.name}
@@ -450,7 +384,7 @@ useEffect( () => {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalBurials}</div>
+              <div className="text-2xl font-bold">{burialMeta.total}</div>
               <p className="text-xs text-muted-foreground">
                 Registros cadastrados
               </p>
@@ -463,7 +397,7 @@ useEffect( () => {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalLeases}</div>
+              <div className="text-2xl font-bold">{leaseMeta.total}</div>
               <p className="text-xs text-muted-foreground">
                 Contratos ativos
               </p>
@@ -478,12 +412,12 @@ useEffect( () => {
             <TabsTrigger value="leases">Aforamentos</TabsTrigger>
             <TabsTrigger value="notifications" className="relative">
               Notificações
-              {pendingNotifications > 0 && (
+              {regularizationCount > 0 && (
                 <Badge
                   variant="destructive"
                   className="ml-2 h-5 min-w-5 px-1.5 text-xs"
                 >
-                  {pendingNotifications}
+                  {regularizationCount}
                 </Badge>
               )}
             </TabsTrigger>
@@ -536,8 +470,13 @@ useEffect( () => {
                   />
                 ) : (
                   <BurialList
-                    burials={filteredBurials}
+                    burials={burials}
                     cemeteries={cemeteries}
+                    loading={burialLoading}
+                    currentPage={burialPage}
+                    lastPage={burialMeta.last_page}
+                    total={burialMeta.total}
+                    onPageChange={setBurialPage}
                     onDelete={handleDeleteBurial}
                     onEdit={setShowEditBurial}
                   />
@@ -577,8 +516,13 @@ useEffect( () => {
                   />
                 ) : (
                   <LeaseList
-                    leases={filteredLeases}
+                    leases={leases}
                     cemeteries={cemeteries}
+                    loading={leaseLoading}
+                    currentPage={leasePage}
+                    lastPage={leaseMeta.last_page}
+                    total={leaseMeta.total}
+                    onPageChange={setLeasePage}
                     onDelete={handleDeleteLease}
                     onEdit={setShowEditLease}
                   />
@@ -589,9 +533,12 @@ useEffect( () => {
 
           <TabsContent value="notifications" className="space-y-4">
             <NotificationsTab
-              burials={filteredBurials}
-              leases={filteredLeases}
-              cemeteries={cemeteries}
+              selectedCemetery={selectedCemetery}
+              refresh={burialRefresh + leaseRefresh}
+              onRegularized={() => {
+                setBurialRefresh(n => n + 1);
+                setLeaseRefresh(n => n + 1);
+              }}
             />
           </TabsContent>
 
@@ -614,7 +561,7 @@ useEffect( () => {
               {user?.name}
             </Badge>
             <Badge variant="outline" className="text-sm">
-              {user?.role}
+              {user?.roles?.[0]}
             </Badge>
           </div>
           <div className="flex items-center gap-2">

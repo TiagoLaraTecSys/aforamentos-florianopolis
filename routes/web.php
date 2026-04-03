@@ -16,13 +16,18 @@ Route::post('/login', function (Request $request) {
 
     $request->session()->regenerate();
 
+    $user = Auth::user();
     return response()->json([
-        'user' => Auth::user()
+        'user' => array_merge($user->toArray(), ['roles' => $user->getRoleNames()]),
     ]);
 });
 
 Route::middleware('auth')->get('/me', function (Request $request) {
-    return response()->json($request->user());
+    $user = $request->user();
+    return response()->json([
+        ...$user->toArray(),
+        'roles' => $user->getRoleNames(),
+    ]);
 });
 
 Route::post('/logout', function (Request $request) {

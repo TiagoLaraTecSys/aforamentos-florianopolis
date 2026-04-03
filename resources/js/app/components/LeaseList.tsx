@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/components/ui/table';
 import { Badge } from '@/app/components/ui/badge';
 import { Button } from '@/app/components/ui/button';
-import { Trash2, FileText, Pencil } from 'lucide-react';
+import { Trash2, FileText, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { LeaseHistory } from '@/app/components/LeaseHistory';
@@ -11,11 +11,16 @@ import type { Lease, Cemetery } from './CemeteryDashboard';
 interface LeaseListProps {
   leases: Lease[];
   cemeteries: Cemetery[];
+  loading?: boolean;
+  currentPage: number;
+  lastPage: number;
+  total: number;
+  onPageChange: (page: number) => void;
   onDelete: (id: number) => void;
   onEdit: (lease: Lease) => void;
 }
 
-export function LeaseList({ leases, cemeteries, onDelete, onEdit }: LeaseListProps) {
+export function LeaseList({ leases, cemeteries, loading, currentPage, lastPage, total, onPageChange, onDelete, onEdit }: LeaseListProps) {
   const getCemeteryName = (cemeteryId: number) => {
     return cemeteries.find(c => c.id === cemeteryId)?.name || 'Desconhecido';
   };
@@ -67,6 +72,14 @@ export function LeaseList({ leases, cemeteries, onDelete, onEdit }: LeaseListPro
     return type === 'Perpétuo' ? 'default' : 'outline';
   };
 
+  if (loading) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        <p>Carregando...</p>
+      </div>
+    );
+  }
+
   if (leases.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
@@ -77,6 +90,7 @@ export function LeaseList({ leases, cemeteries, onDelete, onEdit }: LeaseListPro
   }
 
   return (
+    <div className="space-y-3">
     <div className="rounded-md border">
       <Table>
         <TableHeader>
@@ -155,6 +169,35 @@ export function LeaseList({ leases, cemeteries, onDelete, onEdit }: LeaseListPro
           })}
         </TableBody>
       </Table>
+    </div>
+
+    {/* Pagination */}
+    <div className="flex items-center justify-between px-1">
+      <p className="text-sm text-gray-500">
+        {total} aforamento{total !== 1 ? 's' : ''} encontrado{total !== 1 ? 's' : ''}
+      </p>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage <= 1}
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </Button>
+        <span className="text-sm text-gray-600">
+          Página {currentPage} de {lastPage}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage >= lastPage}
+        >
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
     </div>
   );
 }
